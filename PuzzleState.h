@@ -13,6 +13,7 @@
 
 class PuzzleState {
 private:
+    static int GOAL[3][3];
     int board[3][3];
     int zeroRow, zeroCol;
     int gCost;
@@ -22,6 +23,9 @@ public:
     PuzzleState();
     PuzzleState(const int initBoard[3][3]);
     PuzzleState(const std::vector<int>& flatBoard);
+
+    static void setGoalState(const std::vector<int>& goalState);
+    static int getGoal(int row, int col) { return GOAL[row][col]; }
 
     bool isGoalState() const;
     bool canMoveUp() const;

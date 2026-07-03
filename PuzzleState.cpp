@@ -9,7 +9,7 @@
 #include <iostream>
 #include <sstream>
 
-const int GOAL[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 0}};
+int PuzzleState::GOAL[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 0}};
 
 PuzzleState::PuzzleState() : gCost(0), hCost(0), zeroRow(2), zeroCol(2) {
     for (int i = 0; i < 3; i++) {
@@ -44,10 +44,19 @@ PuzzleState::PuzzleState(const std::vector<int>& flatBoard) : gCost(0), hCost(0)
     }
 }
 
+void PuzzleState::setGoalState(const std::vector<int>& goalState) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            GOAL[i][j] = goalState[i * 3 + j];
+        }
+    }
+}
+
 bool PuzzleState::isGoalState() const {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            if (board[i][j] != GOAL[i][j]) return false;
+            if (this->board[i][j] != GOAL[i][j]) 
+                return false;
         }
     }
     return true;
