@@ -6,7 +6,7 @@
 
 ---
 
-## 🎨 UI 开发接口说明
+## UI 开发接口说明
 
 ### **核心接口概览**
 
@@ -412,15 +412,15 @@ SolveResult result = future.get();
 
 ---
 
-## 📁 项目结构
+## 项目结构
 
 ```
 8-Puzzle-Solver-CPP/
-├── PuzzleState.h/cpp      # 状态表示类 ✅
-├── Heuristic.h/cpp        # 启发式函数 ✅
-├── Solver.h/cpp           # 三种搜索算法 ✅
-├── main.cpp               # 简单测试程序 ✅
-├── main_test.cpp          # 完整测试套件 ✅
+├── PuzzleState.h/cpp      # 状态表示类 
+├── Heuristic.h/cpp        # 启发式函数 
+├── Solver.h/cpp           # 三种搜索算法 
+├── main.cpp               # 简单测试程序 
+├── main_test.cpp          # 完整测试套件 
 └── build/                 # 编译输出目录
 ```
 
