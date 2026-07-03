@@ -16,8 +16,9 @@ struct SolveResult {
     std::vector<PuzzleState> path;
     int nodesExpanded;
     double timeUsed;
+    size_t memoryUsed;  // 内存使用量（字节）
 
-    SolveResult() : success(false), nodesExpanded(0), timeUsed(0.0) {}
+    SolveResult() : success(false), nodesExpanded(0), timeUsed(0.0), memoryUsed(0) {}
 };
 
 class Solver {

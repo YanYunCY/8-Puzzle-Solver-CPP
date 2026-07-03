@@ -8,6 +8,10 @@
 #include "Solver.h"
 #include "Heuristic.h"
 #include <chrono>
+#include <queue>
+#include <unordered_set>
+#include <unordered_map>
+#include <algorithm>
 
 // ==================== BFS 实现 ====================
 
@@ -15,9 +19,6 @@ SolveResult BFSSolver::solve() {
     SolveResult result;
     auto startTime = std::chrono::high_resolution_clock::now();
 
-    // TODO: 实现BFS算法（广度优先搜索）
-    //
-    // 实现步骤：
     // 1. 创建 std::queue<PuzzleState> 作为开放列表
     // 2. 创建 std::unordered_set<std::string> 记录已访问状态
     // 3. 创建 std::unordered_map<std::string, PuzzleState> 记录父节点（用于重建路径）
@@ -37,51 +38,74 @@ SolveResult BFSSolver::solve() {
     //         * 加入队列
     //         * 在父节点映射中记录：parentMap[successorKey] = current
     //         * nodesExpanded++
-    //
-    // 示例代码框架：
-    //   std::queue<PuzzleState> openSet;
-    //   std::unordered_set<std::string> visited;
-    //   std::unordered_map<std::string, PuzzleState> parentMap;
-    //
-    //   openSet.push(initialState);
-    //   visited.insert(initialState.toString());
-    //
-    //   while (!openSet.empty()) {
-    //       PuzzleState current = openSet.front();
-    //       openSet.pop();
-    //
-    //       if (current.isGoalState()) {
-    //           // 重建路径...
-    //           result.success = true;
-    //           break;
-    //       }
-    //
-    //       for (const auto& successor : current.getSuccessors()) {
-    //           std::string key = successor.toString();
-    //           if (visited.find(key) == visited.end()) {
-    //               visited.insert(key);
-    //               openSet.push(successor);
-    //               parentMap[key] = current;
-    //               nodesExpanded++;
-    //           }
-    //       }
-    //   }
+
+    std::queue<PuzzleState> openSet;
+    std::unordered_set<std::string> visited;    //记录已扩展的状态
+    std::unordered_map<std::string, PuzzleState> parentMap;     //记录父节点，用于重建路径
+
+    openSet.push(initialState);
+    visited.insert(initialState.toString());
+
+    while(!openSet.empty()) {
+        PuzzleState current = openSet.front();
+        openSet.pop();
+
+        nodesExpanded++;
+
+        if (current.isGoalState()) {
+            // 重建路径
+            std::vector<PuzzleState> path;
+            std::string key = current.toString();
+            while (parentMap.find(key) != parentMap.end()) {
+                path.push_back(current);
+                current = parentMap[key];
+                key = current.toString();
+            }
+            path.push_back(initialState);
+            std::reverse(path.begin(), path.end());
+            result.path = path;
+            result.success = true;
+            break;
+        }
+
+        for (const auto& successor : current.getSuccessors()) {
+             // 范围for循环，对每个 successor 执行操作
+            std::string key = successor.toString();
+            if (visited.find(key) == visited.end()) {
+                visited.insert(key);
+                openSet.push(successor);
+                parentMap[key] = current;
+            }
+        }
+    }
 
     auto endTime = std::chrono::high_resolution_clock::now();
     result.timeUsed = std::chrono::duration<double, std::milli>(endTime - startTime).count();
     result.nodesExpanded = nodesExpanded;
+
+    // 计算 BFS 内存使用（估算）
+    size_t stateSize = sizeof(PuzzleState);
+    size_t stringSize = 10;  // 平均字符串大小
+    result.memoryUsed = visited.size() * stringSize +           // visited set
+                        openSet.size() * stateSize +             // queue
+                        parentMap.size() * (stringSize + stateSize);  // parent map
+
     return result;
 }
 
 // ==================== A* 实现 ====================
 
+//比较器
+struct CompareState {
+    bool operator()(const PuzzleState& a, const PuzzleState& b) const {
+        return a.getFCost() > b.getFCost(); // fCost越小优先级越高
+    }
+};
+
 SolveResult AStarSolver::solve() {
     SolveResult result;
     auto startTime = std::chrono::high_resolution_clock::now();
 
-    // TODO: 实现A*算法（启发式搜索）
-    //
-    // 实现步骤：
     // 1. 创建优先队列（按fCost排序，使用自定义比较函数）
     // 2. 创建 std::unordered_set<std::string> 作为关闭列表
     // 3. 创建 std::unordered_map<std::string, PuzzleState> 记录父节点
@@ -109,51 +133,75 @@ SolveResult AStarSolver::solve() {
     //         * 记录父节点：parentMap[successorKey] = current
     //         * 加入优先队列
     //         * nodesExpanded++
-    //
-    // 示例代码框架：
-    //   std::priority_queue<PuzzleState, std::vector<PuzzleState>, CompareState> openSet;
-    //   std::unordered_set<std::string> closedSet;
-    //   std::unordered_map<std::string, PuzzleState> parentMap;
-    //   std::unordered_map<std::string, int> gCostMap;
-    //
-    //   PuzzleState start = initialState;
-    //   start.setGCost(0);
-    //   start.setHCost(Heuristic::manhattanDistance(start));
-    //   openSet.push(start);
-    //   gCostMap[start.toString()] = 0;
-    //
-    //   while (!openSet.empty()) {
-    //       PuzzleState current = openSet.top();
-    //       openSet.pop();
-    //
-    //       if (closedSet.find(current.toString()) != closedSet.end()) continue;
-    //       closedSet.insert(current.toString());
-    //
-    //       if (current.isGoalState()) {
-    //           // 重建路径...
-    //           result.success = true;
-    //           break;
-    //       }
-    //
-    //       for (auto successor : current.getSuccessors()) {
-    //           int newGCost = current.getGCost() + 1;
-    //           std::string successorKey = successor.toString();
-    //
-    //           if (gCostMap.find(successorKey) == gCostMap.end() ||
-    //               newGCost < gCostMap[successorKey]) {
-    //               successor.setGCost(newGCost);
-    //               successor.setHCost(Heuristic::manhattanDistance(successor));
-    //               gCostMap[successorKey] = newGCost;
-    //               parentMap[successorKey] = current;
-    //               openSet.push(successor);
-    //               nodesExpanded++;
-    //           }
-    //       }
-    //   }
+    
+    std::priority_queue<PuzzleState, std::vector<PuzzleState>, CompareState> openSet;   //优先队列，按fCost排序,小的先
+    std::unordered_set<std::string> closedSet;   //记录已扩展的状态
+    std::unordered_map<std::string, PuzzleState> parentMap;
+    std::unordered_map<std::string, int> gCostMap;      // 记录每个状态的gCost
+
+    PuzzleState start = initialState;
+    start.setGCost(0);
+    start.setHCost(Heuristic::manhattanDistance(start));
+    openSet.push(start);
+    gCostMap[start.toString()] = 0;
+
+    while(!openSet.empty()) {
+        //取出f值最小的状态
+        PuzzleState current = openSet.top();
+        openSet.pop();
+
+        std::string currentKey = current.toString();
+        if (closedSet.find(currentKey) != closedSet.end()) {
+            continue; // 已经扩展过，跳过
+        }
+
+        closedSet.insert(currentKey);
+        nodesExpanded++;
+
+        if(current.isGoalState()) {
+            // 重建路径
+            std::vector<PuzzleState> path;
+            while (parentMap.find(currentKey) != parentMap.end()) {
+                path.push_back(current);
+                current = parentMap[currentKey];
+                currentKey = current.toString();
+            }
+            path.push_back(initialState);
+            std::reverse(path.begin(), path.end());
+            result.path = path;
+            result.success = true;
+            break;
+        }
+
+        for (auto& successor : current.getSuccessors()) {
+            std::string key = successor.toString();
+            int newGCost = current.getGCost() + 1;
+
+            if(gCostMap.find(key) == gCostMap.end() || newGCost < gCostMap[key]) {      //// 检查：是否未访问过，或找到了更好的路径
+                // 更新gCost和hCost
+                successor.setGCost(newGCost);
+                successor.setHCost(Heuristic::manhattanDistance(successor));
+                gCostMap[key] = newGCost;
+                parentMap[key] = current;
+
+                openSet.push(successor);    // 加入优先队列
+            }
+
+        }
+    }
 
     auto endTime = std::chrono::high_resolution_clock::now();
     result.timeUsed = std::chrono::duration<double, std::milli>(endTime - startTime).count();
     result.nodesExpanded = nodesExpanded;
+
+    // 计算 A* 内存使用（估算）
+    size_t stateSize = sizeof(PuzzleState);
+    size_t stringSize = 10;  // 平均字符串大小
+    result.memoryUsed = closedSet.size() * stringSize +         // closed set
+                        openSet.size() * stateSize +             // priority queue
+                        parentMap.size() * (stringSize + stateSize) +  // parent map
+                        gCostMap.size() * (stringSize + sizeof(int));   // gCost map
+
     return result;
 }
 
@@ -162,10 +210,7 @@ SolveResult AStarSolver::solve() {
 SolveResult IDAStarSolver::solve() {
     SolveResult result;
     auto startTime = std::chrono::high_resolution_clock::now();
-
-    // TODO: 实现IDA*算法（迭代加深A*）
-    //
-    // 实现步骤：
+    
     // 1. 设置初始阈值 threshold = Heuristic::manhattanDistance(initialState)
     // 2. 清空路径向量 path
     // 3. 将初始状态加入路径
@@ -180,101 +225,79 @@ SolveResult IDAStarSolver::solve() {
     //       - 跳出循环
     //    d. 否则：
     //       - 更新 threshold = searchResult（下一个最小的f值）
-    //
-    // 示例代码框架：
-    //   threshold = Heuristic::manhattanDistance(initialState);
-    //   path.clear();
-    //   path.push_back(initialState);
-    //
-    //   while (true) {
-    //       int temp = search(initialState, 0, threshold);
-    //
-    //       if (temp == -1) {
-    //           result.path = path;
-    //           result.success = true;
-    //           break;
-    //       }
-    //
-    //       if (temp == INT_MAX) {
-    //           result.success = false;
-    //           break;
-    //       }
-    //
-    //       threshold = temp;
-    //   }
+
+    threshold = Heuristic::manhattanDistance(initialState);
+    path.clear();
+    path.push_back(initialState);
+
+    while (true) {
+        int searchResult = search(initialState, 0, threshold);
+
+        if (searchResult == -1) {
+            result.path = path;
+            result.success = true;
+            break;
+        }
+
+        if (searchResult == INT_MAX) {
+            result.success = false;
+            break;
+        }
+
+        threshold = searchResult;
+    }
 
     auto endTime = std::chrono::high_resolution_clock::now();
     result.timeUsed = std::chrono::duration<double, std::milli>(endTime - startTime).count();
     result.nodesExpanded = nodesExpanded;
+
+    // 计算 IDA* 内存使用（估算）
+    size_t stateSize = sizeof(PuzzleState);
+    // IDA* 只需要存储当前路径
+    result.memoryUsed = path.capacity() * stateSize;  // path vector
+
     return result;
 }
 
 int IDAStarSolver::search(const PuzzleState& state, int g, int bound) {
-    // TODO: 实现带f值上界的递归深度优先搜索
-    //
     // 参数说明：
     //   state - 当前正在探索的状态
     //   g - 从起点到当前状态的代价（深度）
     //   bound - 当前的f值上界（阈值）
-    //
-    // 返回值：
-    //   -1 表示找到目标
-    //   INT_MAX 表示无解
-    //   其他正整数：超出bound的最小f值（用于下一次迭代）
-    //
-    // 实现步骤：
-    // 1. 计算 f = g + Heuristic::manhattanDistance(state)
-    // 2. 如果 f > bound：
-    //    - 返回 f（超出阈值，剪枝此分支）
-    // 3. 如果 state.isGoalState()：
-    //    - 返回 -1（找到解）
-    // 4. 初始化 min = INT_MAX
-    // 5. 获取state的所有后继状态
-    // 6. 对于每个后继状态：
-    //    a. 检查后继状态是否已在当前路径中（避免循环）：
-    //       - 遍历path向量
-    //       - 如果找到相同状态，跳过此后继状态
-    //    b. 将后继状态加入path
-    //    c. 递归调用： temp = search(successor, g+1, bound)
-    //    d. 如果 temp == -1（找到解）：
-    //       - 立即返回 -1
-    //    e. 如果 temp < min：
-    //       - 更新 min = temp（追踪最小的超出bound的f值）
-    //    f. 从path中移除后继状态（回溯）
-    //    g. nodesExpanded++
-    // 7. 返回 min
-    //
-    // 示例代码框架：
-    //   int f = g + Heuristic::manhattanDistance(state);
-    //
-    //   if (f > bound) return f;
-    //   if (state.isGoalState()) return -1;
-    //
-    //   int min = INT_MAX;
-    //
-    //   for (const auto& successor : state.getSuccessors()) {
-    //       // 检查是否在路径中
-    //       bool inPath = false;
-    //       for (const auto& s : path) {
-    //           if (s == successor) {
-    //               inPath = true;
-    //               break;
-    //           }
-    //       }
-    //
-    //       if (!inPath) {
-    //           path.push_back(successor);
-    //           int temp = search(successor, g + 1, bound);
-    //
-    //           if (temp == -1) return -1;
-    //           if (temp < min) min = temp;
-    //
-    //           path.pop_back();
-    //           nodesExpanded++;
-    //       }
-    //   }
-    //
-    //   return min;
 
-    return -1;
+    int f = g + Heuristic::manhattanDistance(state);
+
+    if (f > bound)
+        return f;   // 超出阈值，剪枝此分支
+    if (state.isGoalState()) 
+        return -1;
+
+    nodesExpanded++;
+       
+    int min = INT_MAX;
+
+    for (const auto& successor : state.getSuccessors()) {
+        // 检查是否在路径中
+        bool inPath = false;
+        for (const auto& s : path) {
+            if (s == successor) {
+                inPath = true;
+                break;
+            }
+        }
+
+        if (!inPath) {
+            path.push_back(successor);
+            int temp = search(successor, g + 1, bound);
+
+            if (temp == -1) 
+                return -1;
+            if (temp < min) 
+                min = temp;
+
+            path.pop_back();
+        }
+    }
+
+    return min;
 }
