@@ -1,10 +1,16 @@
+/**
+ * @file Solver.h
+ * @brief 搜索算法求解器类声明
+ * @author YanYun
+ * @date 2026-06-30
+ */
+
 #ifndef SOLVER_H
 #define SOLVER_H
 
 #include "PuzzleState.h"
 #include <vector>
 
-// 求解结果结构
 struct SolveResult {
     bool success;
     std::vector<PuzzleState> path;
@@ -14,7 +20,6 @@ struct SolveResult {
     SolveResult() : success(false), nodesExpanded(0), timeUsed(0.0) {}
 };
 
-// 求解器基类
 class Solver {
 protected:
     PuzzleState initialState;
@@ -26,21 +31,18 @@ public:
     virtual SolveResult solve() = 0;
 };
 
-// BFS求解器
 class BFSSolver : public Solver {
 public:
     BFSSolver(const PuzzleState& initial) : Solver(initial) {}
     SolveResult solve() override;
 };
 
-// A*求解器
 class AStarSolver : public Solver {
 public:
     AStarSolver(const PuzzleState& initial) : Solver(initial) {}
     SolveResult solve() override;
 };
 
-// IDA*求解器
 class IDAStarSolver : public Solver {
 private:
     std::vector<PuzzleState> path;

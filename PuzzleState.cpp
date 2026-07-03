@@ -1,8 +1,14 @@
+/**
+ * @file PuzzleState.cpp
+ * @brief 8数码问题状态类的实现
+ * @author YanYun
+ * @date 2026-06-30
+ */
+
 #include "PuzzleState.h"
 #include <iostream>
 #include <sstream>
 
-// 目标状态
 const int GOAL[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 0}};
 
 PuzzleState::PuzzleState() : gCost(0), hCost(0), zeroRow(2), zeroCol(2) {

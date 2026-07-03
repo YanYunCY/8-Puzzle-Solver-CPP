@@ -1,3 +1,10 @@
+/**
+ * @file Solver.cpp
+ * @brief 搜索算法的实现
+ * @author YanYun
+ * @date 2026-06-30
+ */
+
 #include "Solver.h"
 #include "Heuristic.h"
 #include <chrono>

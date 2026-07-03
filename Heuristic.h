@@ -1,9 +1,15 @@
+/**
+ * @file Heuristic.h
+ * @brief 启发式函数类声明
+ * @author YanYun
+ * @date 2026-06-30
+ */
+
 #ifndef HEURISTIC_H
 #define HEURISTIC_H
 
 #include "PuzzleState.h"
 
-// 启发式函数类
 class Heuristic {
 public:
     static int manhattanDistance(const PuzzleState& state);
