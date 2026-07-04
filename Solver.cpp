@@ -37,7 +37,6 @@ SolveResult BFSSolver::solve() {
     //         * 加入已访问集合
     //         * 加入队列
     //         * 在父节点映射中记录：parentMap[successorKey] = current
-    //         * nodesExpanded++
 
     std::queue<PuzzleState> openSet;
     std::unordered_set<std::string> visited;    //记录已扩展的状态
@@ -132,7 +131,6 @@ SolveResult AStarSolver::solve() {
     //         * 更新gCostMap[successorKey] = newGCost
     //         * 记录父节点：parentMap[successorKey] = current
     //         * 加入优先队列
-    //         * nodesExpanded++
     
     std::priority_queue<PuzzleState, std::vector<PuzzleState>, CompareState> openSet;   //优先队列，按fCost排序,小的先
     std::unordered_set<std::string> closedSet;   //记录已扩展的状态
