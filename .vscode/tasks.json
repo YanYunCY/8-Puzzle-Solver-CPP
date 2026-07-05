@@ -2,16 +2,19 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "C/C++: 构建项目 (所有文件)",
+            "label": "C/C++: 智能编译",
             "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
                 "-std=c++17",
                 "-fexec-charset=GBK",
-                "${workspaceFolder}\\*.cpp",
+                "${file}",
+                "${workspaceFolder}\\PuzzleState.cpp",
+                "${workspaceFolder}\\Heuristic.cpp",
+                "${workspaceFolder}\\Solver.cpp",
                 "-o",
-                "${workspaceFolder}\\build\\PuzzleSolver.exe"
+                "${workspaceFolder}\\build\\${fileBasenameNoExtension}.exe"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -23,41 +26,27 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "编译所有 .cpp 文件到 build 目录"
-        },
-        {
-            "type": "shell",
-            "label": "创建 build 目录",
-            "command": "if not exist \"${workspaceFolder}\\build\" mkdir \"${workspaceFolder}\\build\"",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "detail": "确保 build 目录存在"
+            "detail": "根据当前打开的文件编译：ui_main.cpp→ui_main.exe, test_main.cpp→test_main.exe"
         },
         {
             "type": "cppbuild",
-            "label": "C/C++: 完整构建 (带清理)",
+            "label": "C/C++: g++.exe 生成活动文件",
             "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "-std=c++17",
-                "-fexec-charset=GBK",
-                "${workspaceFolder}\\*.cpp",
+                "${file}",
                 "-o",
-                "${workspaceFolder}\\build\\PuzzleSolver.exe"
+                "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],
             "options": {
-                "cwd": "${workspaceFolder}"
+                "cwd": "${fileDirname}"
             },
             "problemMatcher": [
                 "$gcc"
             ],
-            "dependsOn": [
-                "创建 build 目录"
-            ],
             "group": "build",
-            "detail": "先创建目录再编译"
+            "detail": "编译器: C:\\msys64\\ucrt64\\bin\\g++.exe"
         }
     ],
     "version": "2.0.0"

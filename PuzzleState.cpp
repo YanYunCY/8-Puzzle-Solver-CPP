@@ -108,11 +108,12 @@ std::vector<PuzzleState> PuzzleState::getSuccessors() const {
     return successors;
 }
 
-bool PuzzleState::isSolvable() const {
+// 计算 3x3 棋盘（忽略空格）的逆序数
+static int countInversions(const int b[3][3]) {
     std::vector<int> flat;
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            if (board[i][j] != 0) flat.push_back(board[i][j]);
+            if (b[i][j] != 0) flat.push_back(b[i][j]);
         }
     }
     int inversions = 0;
@@ -121,7 +122,12 @@ bool PuzzleState::isSolvable() const {
             if (flat[i] > flat[j]) inversions++;
         }
     }
-    return inversions % 2 == 0;
+    return inversions;
+}
+
+bool PuzzleState::isSolvable() const {
+    // 有解当且仅当初始与目标状态的逆序数奇偶性相同（合法移动不改变奇偶性）
+    return countInversions(board) % 2 == countInversions(GOAL) % 2;
 }
 
 std::string PuzzleState::toString() const {
