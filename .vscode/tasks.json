@@ -30,6 +30,31 @@
         },
         {
             "type": "cppbuild",
+            "label": "C/C++: 编译 benchmark（O2优化）",
+            "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-std=c++17",
+                "-O2",
+                "-static",
+                "${workspaceFolder}\\benchmark_main.cpp",
+                "${workspaceFolder}\\PuzzleState.cpp",
+                "${workspaceFolder}\\Heuristic.cpp",
+                "${workspaceFolder}\\Solver.cpp",
+                "-o",
+                "${workspaceFolder}\\build\\benchmark.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build",
+            "detail": "批量性能测试专用：-O2 优化 + 静态链接（10000 次运行务必用此任务，-g 调试版会慢几十倍）"
+        },
+        {
+            "type": "cppbuild",
             "label": "C/C++: g++.exe 生成活动文件",
             "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
             "args": [

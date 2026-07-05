@@ -48,10 +48,11 @@ class IDAStarSolver : public Solver {
 private:
     std::vector<PuzzleState> path;
     int threshold;
+    size_t maxPathLen;   // 搜索过程中路径的峰值长度（用于统计内存占用）
     int search(const PuzzleState& state, int g, int bound);
 
 public:
-    IDAStarSolver(const PuzzleState& initial) : Solver(initial), threshold(0) {}
+    IDAStarSolver(const PuzzleState& initial) : Solver(initial), threshold(0), maxPathLen(0) {}
     SolveResult solve() override;
 };
 

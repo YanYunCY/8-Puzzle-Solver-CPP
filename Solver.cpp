@@ -227,6 +227,7 @@ SolveResult IDAStarSolver::solve() {
     threshold = Heuristic::manhattanDistance(initialState);
     path.clear();
     path.push_back(initialState);
+    maxPathLen = 1;
 
     while (true) {
         int searchResult = search(initialState, 0, threshold);
@@ -250,9 +251,9 @@ SolveResult IDAStarSolver::solve() {
     result.nodesExpanded = nodesExpanded;
 
     // 计算 IDA* 内存使用（估算）
-    size_t stateSize = sizeof(PuzzleState);
-    // IDA* 只需要存储当前路径
-    result.memoryUsed = path.capacity() * stateSize;  // path vector
+    // IDA* 只需要存储当前搜索路径，内存占用 = 路径峰值长度 × 状态大小，
+    // 与解的深度成正比（O(d)），这正是 IDA* 相对 BFS/A* 的核心优势
+    result.memoryUsed = maxPathLen * sizeof(PuzzleState);
 
     return result;
 }
@@ -286,6 +287,7 @@ int IDAStarSolver::search(const PuzzleState& state, int g, int bound) {
 
         if (!inPath) {
             path.push_back(successor);
+            if (path.size() > maxPathLen) maxPathLen = path.size();
             int temp = search(successor, g + 1, bound);
 
             if (temp == -1) 
